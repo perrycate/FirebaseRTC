@@ -15,6 +15,7 @@ const configuration = {
 let peerConnection = null;
 let localStream = null;
 let remoteStream = null;
+let dataChannel = null;
 let roomDialog = null;
 let roomId = null;
 
@@ -30,11 +31,23 @@ async function createRoom() {
   document.querySelector('#createBtn').disabled = true;
   document.querySelector('#joinBtn').disabled = true;
   const db = firebase.firestore();
+  const a = await db.collection('rooms');
+  console.log(a);
   const roomRef = await db.collection('rooms').doc();
 
   console.log('Create PeerConnection with configuration: ', configuration);
   peerConnection = new RTCPeerConnection(configuration);
 
+  dataChannel = peerConnection.createDataChannel("test");
+  console.log("test");
+  dataChannel.addEventListener("open", event => {
+    console.log("open!");
+    dataChannel.send("HIIII")  ;
+  });
+    dataChannel.addEventListener('message', event => {
+        const msg = event.data;
+        console.log("got: " + msg);
+    });
   registerPeerConnectionListeners();
 
   localStream.getTracks().forEach(track => {
@@ -128,7 +141,10 @@ async function joinRoomById(roomId) {
   if (roomSnapshot.exists) {
     console.log('Create PeerConnection with configuration: ', configuration);
     peerConnection = new RTCPeerConnection(configuration);
+    console.log("created connection");
+    
     registerPeerConnectionListeners();
+    
     localStream.getTracks().forEach(track => {
       peerConnection.addTrack(track, localStream);
     });
@@ -181,6 +197,17 @@ async function joinRoomById(roomId) {
       });
     });
     // Listening for remote ICE candidates above
+    peerConnection.addEventListener('datachannel', event => {
+        console.log("recieved channel!");
+        dataChannel = event.channel;
+        dataChannel.addEventListener('message', event => {
+            const msg = event.data;
+            console.log("got: " + msg);
+            dataChannel.send(msg + " back!");
+        })
+    });
+
+
   }
 }
 
