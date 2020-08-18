@@ -43,12 +43,14 @@ async function createRoom() {
   console.log("test");
   dataChannel.addEventListener("open", event => {
     console.log("open!");
-    dataChannel.send("HIIII")  ;
+    setInterval(() => dataChannel.send(Date.now()), 1000);
   });
-    dataChannel.addEventListener('message', event => {
-        const msg = event.data;
-        console.log("got: " + msg);
-    });
+  dataChannel.addEventListener('message', event => {
+    const sentTime = parseInt(event.data);
+    elapsedMs = Date.now() - sentTime;
+    console.log(elapsedMs + " elapsed!")
+    document.querySelector('#display').innerText = elapsedMs;
+  });
   registerPeerConnectionListeners();
 
   // Code for collecting ICE candidates below
@@ -180,7 +182,7 @@ async function joinRoomById(roomId) {
         dataChannel.addEventListener('message', event => {
             const msg = event.data;
             console.log("got: " + msg);
-            dataChannel.send(msg + " back!");
+            dataChannel.send(msg);
         })
     });
 
