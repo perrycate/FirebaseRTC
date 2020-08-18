@@ -22,6 +22,10 @@ function init() {
   document.querySelector('#createBtn').addEventListener('click', createRoom);
   document.querySelector('#joinBtn').addEventListener('click', joinRoom);
   roomDialog = new mdc.dialog.MDCDialog(document.querySelector('#room-dialog'));
+  if (window.location.pathname != "/") {
+      document.querySelector("#room-id").value = window.location.pathname.slice(1);
+      joinRoom();
+  }
 }
 
 async function createRoom() {
@@ -75,7 +79,7 @@ async function createRoom() {
   roomId = roomRef.id;
   console.log(`New room created with SDP offer. Room ID: ${roomRef.id}`);
   document.querySelector(
-      '#currentRoom').innerText = `Current room is ${roomRef.id} - You are the caller!`;
+      '#currentRoom').innerText = `Room url: ${new URL(roomRef.id, window.location)} - You are the caller!`;
   // Code for creating a room above
 
   // Listening for remote session description below
